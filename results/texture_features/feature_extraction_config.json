@@ -1,0 +1,64 @@
+{
+  "image_representation": "Standard 8-bit Grayscale (0.299R + 0.587G + 0.114B)",
+  "quantization_method": "Deterministic Integer Division (gray // 8)",
+  "num_gray_levels": 32,
+  "glcm_parameters": {
+    "distances": [
+      1,
+      2,
+      4
+    ],
+    "angles_rad": [
+      0.0,
+      0.7853981633974483,
+      1.5707963267948966,
+      2.356194490192345
+    ],
+    "angles_deg": [
+      0,
+      45,
+      90,
+      135
+    ],
+    "symmetric": true,
+    "normed": true,
+    "properties": [
+      "contrast",
+      "dissimilarity",
+      "homogeneity",
+      "energy",
+      "ASM",
+      "correlation"
+    ],
+    "aggregation": [
+      "mean",
+      "std"
+    ],
+    "total_glcm_features": 12
+  },
+  "glrlm_parameters": {
+    "directions_deg": [
+      0,
+      45,
+      90,
+      135
+    ],
+    "features": [
+      "sre",
+      "lre",
+      "gln",
+      "rln",
+      "rp",
+      "lglre",
+      "hglre",
+      "srlgle",
+      "srhgle",
+      "lrlgle",
+      "lrhgle"
+    ],
+    "aggregation": "directional_mean",
+    "total_glrlm_features": 11
+  },
+  "total_combined_features": 23,
+  "total_feature_rows": 616
+}

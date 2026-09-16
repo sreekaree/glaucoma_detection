@@ -1,6 +1,6 @@
 # Glaucoma Detection Project — Data Preparation & Experimental Pipeline
 
-This repository contains the complete, reproducible data preparation, auditing, patient-level cross-validation, preprocessing, quality control, visual verification, and exploratory data analysis pipeline for binary glaucoma classification from fundus photography.
+This repository contains the complete, reproducible data preparation, auditing, patient-level cross-validation, preprocessing, quality control, visual verification, exploratory data analysis, and handcrafted texture feature extraction (GLCM + GLRLM) pipeline for binary glaucoma classification from fundus photography.
 
 ---
 
@@ -10,7 +10,7 @@ This repository contains the complete, reproducible data preparation, auditing, 
 - **Classification Target ($y$)**:
   - `0 = Normal` (Healthy retina)
   - `1 = Glaucoma` (Glaucomatous optic neuropathy)
-- **Primary Design Principle**: Absolute patient-level data separation and zero data leakage. Training normalization statistics, model selection, hyperparameter tuning, and decision threshold selection are computed strictly within the development set, while evaluation is conducted on completely independent external test sets.
+- **Primary Design Principle**: Absolute patient-level data separation and zero data leakage. Training normalization statistics, feature scaling, model selection, hyperparameter tuning, and decision threshold selection are computed strictly within the development set, while evaluation is conducted on completely independent external test sets.
 
 ---
 
@@ -43,57 +43,35 @@ This repository contains the complete, reproducible data preparation, auditing, 
 
 ---
 
-## 3. Dataset Details & Leakage Prevention
+## 3. Preprocessing & Texture Feature Extraction Pipeline
 
-### A. DRISHTI-GS1 (Development Dataset)
-- **Total Images**: 101 fundus photographs (50 from original `Training`, 51 from original `Test`).
-- **Patient Count**: 68 unique Patient IDs.
-- **Bilateral Discordant Cases**: 6 patients (12 images) have different eye-level diagnoses (e.g., Left Eye Normal, Right Eye Glaucoma). Their eye-level labels are strictly preserved (`0` and `1`), while both images are grouped into the **same fold** using `StratifiedGroupKFold`.
-- **CV Strategy**: `sklearn.model_selection.StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)` with `groups = Patient ID`.
-  - Fold 0: 13 Patients | 20 Images (6 Normal, 14 Glaucoma, 2 Discordant)
-  - Fold 1: 13 Patients | 20 Images (6 Normal, 14 Glaucoma, 2 Discordant)
-  - Fold 2: 14 Patients | 20 Images (6 Normal, 14 Glaucoma, 2 Discordant)
-  - Fold 3: 14 Patients | 21 Images (7 Normal, 14 Glaucoma, 4 Discordant)
-  - Fold 4: 14 Patients | 20 Images (6 Normal, 14 Glaucoma, 2 Discordant)
-
-### B. HRF (External Evaluation Test Set 1)
-- **Primary Cohort**: 30 high-resolution fundus images (15 Normal `_h`, 15 Glaucoma `_g`).
-- **Exclusion**: 15 Diabetic Retinopathy (`_d`) images are strictly excluded (`split = excluded`, `exclusion_reason = diabetic_retinopathy`).
-
-### C. RIM-ONE DL (External Evaluation Test Set 2)
-- **Primary Cohort**: All 485 unique physical images from `partitioned_by_hospital/` (`training_set/` + `test_set/`).
-- **Hospital Site Breakdown**:
-  - `r1` (Hospital 1 / RIM-ONE v1): 86 Normal, 12 Glaucoma (98 total)
-  - `r2` (Hospital 2 / RIM-ONE v2): 142 Normal, 108 Glaucoma (250 total)
-  - `r3` (Hospital 3 / RIM-ONE v3): 85 Normal, 52 Glaucoma (137 total)
-- **Directory Exclusion**: `partitioned_randomly/` is **ignored** because MD5 binary checksum analysis proved it contains the exact same 485 physical images arranged into different subfolders.
-
----
-
-## 4. Preprocessing Pipeline & Parameters
-
-The exact same standardized preprocessing pipeline is applied to all datasets:
-
+### A. Preprocessing Pipeline
 ```
 Raw Image File (Raw data remains 100% untouched)
        ↓
-Validate Readability
-       ↓
-Non-Aggressive FOV Crop (Threshold=12, Safety Margin=2%)
-  -> Crops black background margins without clipping retina, optic disc, macula, or vessels.
+FOV Crop (Threshold=12, Safety Margin=2% -> Removes black border without clipping retina/optic disc)
        ↓
 Aspect-Ratio Preserving Resize & Square Padding (Center canvas -> 224 × 224 × 3 RGB)
-  -> Prevents geometric stretching or optic disc distortion.
        ↓
 CLAHE on GREEN CHANNEL ONLY (clip_limit = 2.0, tile_grid_size = (8, 8))
-  -> Enhances retinal vessel and optic nerve head contrast while preserving Red/Blue channels.
        ↓
 Save as 8-bit RGB PNG in data/processed/<DATASET>/<class_name>/<image_id>.png
 ```
 
+### B. Texture Feature Extraction (GLCM + GLRLM)
+Quantized 8-bit Grayscale ($Y = 0.299R + 0.587G + 0.114B$) to 32 gray levels ($0..31$):
+- **GLCM (12 Features)**: Distances `[1, 2, 4]`, Angles `[0, 45, 90, 135 deg]`, symmetric & normed. Features: `contrast`, `dissimilarity`, `homogeneity`, `energy`, `ASM`, `correlation` (means and stds).
+- **GLRLM (11 Features)**: Directions `[0, 45, 90, 135 deg]`. Features: `sre`, `lre`, `gln`, `rln`, `rp`, `lglre`, `hglre`, `srlgle`, `srhgle`, `lrlgle`, `lrhgle` (directional means).
+- **Combined (23 Features)**: 12 GLCM + 11 GLRLM features.
+
+Saved files:
+- `features/glcm_features.csv` (Shape: 616 x 24)
+- `features/glrlm_features.csv` (Shape: 616 x 23)
+- `features/glcm_glrlm_features.csv` (Shape: 616 x 35)
+
 ---
 
-## 5. Repository Structure
+## 4. Repository Structure
 
 ```
 glaucoma_detection/
@@ -116,7 +94,8 @@ glaucoma_detection/
 │   ├── preprocess_images.py           # Runs 224x224 Green-channel CLAHE pipeline
 │   ├── quality_control.py             # Executes 8-point automated QC suite
 │   ├── visual_checks.py               # Generates side-by-side BEFORE/AFTER visual grids
-│   └── eda.py                         # Computes EDA statistics and outputs plots
+│   ├── eda.py                         # Computes EDA statistics and outputs plots
+│   └── extract_texture_features.py    # Extracts GLCM (12) + GLRLM (11) texture features
 │
 ├── metadata/
 │   └── master_manifest.csv            # Authoritative project manifest (631 entries)
@@ -124,54 +103,35 @@ glaucoma_detection/
 ├── splits/
 │   └── drishti_5fold_splits.csv       # DRISHTI 5-fold cross-validation assignments
 │
+├── features/
+│   ├── glcm_features.csv              # 12 GLCM features + metadata (616 rows)
+│   ├── glrlm_features.csv             # 11 GLRLM features + metadata (616 rows)
+│   └── glcm_glrlm_features.csv        # 23 Combined features + metadata (616 rows)
+│
 └── results/
     ├── audit/                         # Raw dataset audit text and JSON reports
     ├── quality_control/               # QC test result logs (100% Passed)
     ├── visual_checks/                 # BEFORE/AFTER grid images
-    └── eda/                           # EDA text summaries and distribution charts
+    ├── eda/                           # EDA text summaries and distribution charts
+    └── texture_features/              # Feature stats, config JSON & extraction report
 ```
 
 ---
 
-## 6. How to Reproduce the Pipeline
+## 5. How to Reproduce the Pipeline
 
-1. **Clone the Repository & Configure Paths**:
-   ```bash
-   git clone <repository_url>
-   cd glaucoma_detection
-   cp config/paths.example.yaml config/paths.yaml
-   ```
-   Edit `config/paths.yaml` with your local dataset locations.
+```bash
+# 1. Install Dependencies
+pip install -r requirements.txt
 
-2. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   # OR using Conda:
-   conda env create -f environment.yml
-   conda activate glaucoma-env
-   ```
-
-3. **Execute Data Pipeline Step-by-Step**:
-   ```bash
-   python src/audit_datasets.py
-   python src/split_drishti.py
-   python src/analyze_rimone_overlap.py
-   python src/create_manifest.py
-   python src/preprocess_images.py
-   python src/quality_control.py
-   python src/visual_checks.py
-   python src/eda.py
-   ```
-
----
-
-## 7. Future Machine Learning & Deep Learning Roadmap
-
-1. **Classical ML (Handcrafted Texture Features)**:
-   - GLCM (Gray-Level Co-occurrence Matrix): Contrast, Dissimilarity, Homogeneity, Energy, Correlation, ASM.
-   - GLRLM (Gray-Level Run Length Matrix): SRE, LRE, GLN, RLN, RP.
-   - Classifiers: Support Vector Machines (SVM), Random Forest, XGBoost trained on DRISHTI 5-fold CV.
-2. **Deep Learning Architectures**:
-   - Transfer learning using MobileNetV2 and ResNet50 fine-tuned on DRISHTI.
-3. **Explainability & Model Transparency**:
-   - Grad-CAM and Grad-CAM++ visualizations to verify model focus on optic nerve head / cup-to-disc ratio.
+# 2. Run Data Preparation & Feature Extraction
+python src/audit_datasets.py
+python src/split_drishti.py
+python src/analyze_rimone_overlap.py
+python src/create_manifest.py
+python src/preprocess_images.py
+python src/quality_control.py
+python src/visual_checks.py
+python src/eda.py
+python src/extract_texture_features.py
+```

@@ -1,0 +1,22 @@
+============================================================
+TEXTURE FEATURE EXTRACTION REPORT (GLCM + GLRLM)
+============================================================
+
+Total Feature Rows            : 616
+  - DRISHTI Development Rows  : 101
+  - HRF External Test Rows    : 30
+  - RIM-ONE External Test Rows: 485
+
+GLCM Features Count           : 12 (6 properties x 2 stats: mean, std)
+GLRLM Features Count          : 11 (standard 11 run-length metrics)
+Combined Features Count       : 23
+
+Quantization                  : 256 -> 32 gray levels
+GLCM Distances                : [1, 2, 4]
+GLCM / GLRLM Angles           : [0, 45, 90, 135 degrees]
+
+FEATURE QC & SANITY CHECKS:
+  - NaN values in features    : 0
+  - Inf values in features    : 0
+  - Constant / Zero Variance : 0
+  - DRISHTI 5-Fold Alignment  : PASSED

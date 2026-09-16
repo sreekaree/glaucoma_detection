@@ -15,7 +15,7 @@ This document records the exact current state, completed milestones, verified me
 | **Automated Quality Control** | **COMPLETE** | 100% Passed (0 errors across 8 verification tests). |
 | **Visual Verification Grids**| **COMPLETE** | Generated side-by-side BEFORE/AFTER visual comparison grids. |
 | **Exploratory Data Analysis** | **COMPLETE** | Summary tables, majority baselines, and distribution charts. |
-| **Classical ML (GLCM/GLRLM)** | **NOT STARTED**| Handcrafted feature extraction pending. |
+| **Texture Feature Extraction** | **COMPLETE** | Extracted 12 GLCM + 11 GLRLM features (616 rows, 0 NaN/Inf). |
 | **Classical Classifiers** | **NOT STARTED**| SVM / Random Forest / XGBoost training pending. |
 | **Deep Learning Models** | **NOT STARTED**| MobileNetV2 / ResNet50 fine-tuning pending. |
 | **Explainability (Grad-CAM)** | **NOT STARTED**| Grad-CAM / Grad-CAM++ visualizations pending. |
@@ -33,7 +33,7 @@ This document records the exact current state, completed milestones, verified me
 2. **Data Leakage & Exclusion Rules**:
    - **HRF `_d` Exclusion**: 15 Diabetic Retinopathy images in HRF are excluded (`split = excluded`).
    - **RIM-ONE DL Scheme Selection**: `partitioned_randomly/` is ignored because MD5 checksum analysis proved it contains the exact same 485 physical images as `partitioned_by_hospital/`. All 485 unique images from `partitioned_by_hospital/` are included as `external_test`.
-   - **Zero Leakage**: HRF and RIM-ONE DL are never used during training, validation, hyperparameter tuning, threshold selection, or normalization statistics calculation.
+   - **Zero Leakage**: HRF and RIM-ONE DL are never used during training, validation, hyperparameter tuning, threshold selection, feature scaling (StandardScaler), or normalization statistics calculation.
 
 3. **DRISHTI 5-Fold Stratified Group CV Design**:
    - **Label Target**: Individual eye/image diagnosis ($0 = \text{Normal}, 1 = \text{Glaucoma}$) from `Drishti-GS1_diagnosis.xlsx`.
@@ -67,20 +67,32 @@ This document records the exact current state, completed milestones, verified me
 
 ---
 
-## 4. Preprocessing & Quality Control Confirmation
+## 4. Texture Feature Extraction Summary (STEP 6)
 
-- **Target Size**: $224 \times 224 \times 3$ RGB.
-- **FOV Crop**: Threshold = 12, Margin = 2%. Removes black background without clipping retina or optic disc.
-- **Resize & Padding**: Aspect ratio preserved; centered on black canvas.
-- **CLAHE**: Applied to **Green channel only** (`clip_limit = 2.0`, `tile_grid_size = (8, 8)`).
-- **QC Verification**: 616 processed images verified; **100% Passed (0 errors)**.
+Handcrafted texture features were extracted from the preprocessed 224x224 RGB images after deterministic 32-level grayscale quantization ($Y = 0.299R + 0.587G + 0.114B$):
+
+1. **GLCM Features (12 Features)**:
+   - Config: 32 gray levels, distances `[1, 2, 4]`, angles `[0, 45, 90, 135 deg]`, symmetric & normed.
+   - Properties: `contrast`, `dissimilarity`, `homogeneity`, `energy`, `ASM`, `correlation` (mean and std across 12 combinations).
+   - Saved to: `features/glcm_features.csv` (Shape: 616 x 24).
+
+2. **GLRLM Features (11 Features)**:
+   - Config: 32 gray levels, 4 directions (`0, 45, 90, 135 deg`).
+   - Metrics: `sre`, `lre`, `gln`, `rln`, `rp`, `lglre`, `hglre`, `srlgle`, `srhgle`, `lrlgle`, `lrhgle` (directional means).
+   - Saved to: `features/glrlm_features.csv` (Shape: 616 x 23).
+
+3. **Combined GLCM + GLRLM Features (23 Features)**:
+   - Saved to: `features/glcm_glrlm_features.csv` (Shape: 616 x 35).
+   - QC Check: 0 NaN values, 0 Inf values, 0 constant columns across all 616 rows.
 
 ---
 
 ## 5. Next Steps for Upcoming ML Experiments
 
-1. Extract GLCM & GLRLM texture features from preprocessed images.
-2. Train classical ML baselines (SVM, Random Forest, XGBoost) on DRISHTI 5-fold CV.
-3. Evaluate classical models on external test sets (HRF and RIM-ONE DL).
-4. Fine-tune deep learning backbones (MobileNetV2, ResNet50) on DRISHTI.
-5. Generate Grad-CAM heatmaps for explainability analysis.
+1. Train classical ML classifiers (SVM, Random Forest, XGBoost) on DRISHTI 5-fold CV using:
+   - Feature Set A: GLCM only
+   - Feature Set B: GLRLM only
+   - Feature Set C: GLCM + GLRLM combined
+2. Evaluate classical models on external test sets (HRF and RIM-ONE DL).
+3. Fine-tune deep learning backbones (MobileNetV2, ResNet50) on DRISHTI.
+4. Generate Grad-CAM heatmaps for explainability analysis.
