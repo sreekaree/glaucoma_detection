@@ -1,0 +1,7 @@
+# Template dataset configuration paths
+# Copy this file to paths.yaml and configure your local dataset directories.
+
+DRISHTI_PATH: "path/to/Drishti-GS1_files"
+HRF_PATH: "path/to/HRF Dataset"
+RIMONE_PATH: "path/to/RIM-ONE_DL_images"
+PROJECT_ROOT: "."

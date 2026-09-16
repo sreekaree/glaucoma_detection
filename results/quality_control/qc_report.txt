@@ -1,0 +1,18 @@
+============================================================
+AUTOMATED QUALITY CONTROL (QC) REPORT
+============================================================
+
+OVERALL QC STATUS              : PASSED
+Total Manifest Entries         : 631
+Verified Processed Images      : 616
+Excluded Entries               : 15
+
+VERIFICATION SUMMARY:
+1. Image Resolution (224x224)  : PASSED
+2. Color Format (3 Channel RGB): PASSED
+3. File Readability            : PASSED
+4. Non-Black Intensity Check   : PASSED
+5. NaN/Inf Value Check         : PASSED
+6. DRISHTI Zero Patient Leakage: PASSED
+7. HRF _d Strict Exclusion     : PASSED
+8. RIM-ONE 485 Unique Images   : PASSED

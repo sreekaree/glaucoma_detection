@@ -1,0 +1,28 @@
+{
+  "baselines": {
+    "DRISHTI": {
+      "total_usable": 101,
+      "normal": 31,
+      "glaucoma": 70,
+      "majority_class": "Glaucoma",
+      "majority_baseline_pct": 69.31
+    },
+    "HRF": {
+      "total_usable": 30,
+      "normal": 15,
+      "glaucoma": 15,
+      "majority_class": "Normal",
+      "majority_baseline_pct": 50.0
+    },
+    "RIM-ONE": {
+      "total_usable": 485,
+      "normal": 313,
+      "glaucoma": 172,
+      "majority_class": "Normal",
+      "majority_baseline_pct": 64.54
+    }
+  },
+  "total_manifest_entries": 631,
+  "total_experimental_images": 616,
+  "total_excluded_images": 15
+}

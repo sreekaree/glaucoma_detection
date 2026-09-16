@@ -1,0 +1,16 @@
+{
+  "checks_passed": true,
+  "details": {
+    "missing_processed_files": 0,
+    "duplicate_processed_paths": 0,
+    "dimension_errors": 0,
+    "channel_errors": 0,
+    "corrupt_files": 0,
+    "all_black_files": 0,
+    "nan_inf_files": 0,
+    "drishti_leaked_patients": 0,
+    "hrf_d_in_experimental_data": 0,
+    "rimone_total_images": 485,
+    "rimone_duplicate_sources": 0
+  }
+}

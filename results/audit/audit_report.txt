@@ -1,0 +1,38 @@
+============================================================
+DATASET AUDIT REPORT - GLAUCOMA DETECTION PROJECT
+============================================================
+
+1. DRISHTI-GS1 AUDIT SUMMARY
+------------------------------------------------------------
+Original Training Images Count : 50
+Original Test Images Count     : 51
+Total Pooled DRISHTI Images    : 101
+Matched Excel Diagnosis Images : 101
+Normal Count (label 0)         : 31
+Glaucoma Count (label 1)       : 70
+Unique Patient IDs             : 68
+Multi-image Patients Count     : 33
+Patients in BOTH Train & Test   : 18
+Unmatched Excel Records        : 0
+Images without Label           : 0
+Unreadable Images              : 0
+File Extensions                : ['.png']
+
+2. HRF AUDIT SUMMARY
+------------------------------------------------------------
+Primary JPG Images Count (images/): 45
+  _g (Glaucoma, label 1)          : 15
+  _h (Healthy/Normal, label 0)    : 15
+  _d (Diabetic Retinopathy)       : 15 [EXCLUDE FROM BINARY ML]
+Unrecognized Filenames            : 0
+Unreadable Images                 : 0
+Dimensions Found                  : [[3504, 2336, 'RGB']]
+
+3. RIM-ONE DL AUDIT SUMMARY
+------------------------------------------------------------
+Hospital TEST Normal Count        : 118
+Hospital TEST Glaucoma Count      : 56
+Hospital TEST Total Count         : 174
+Hospital TEST Filename Prefixes   : {'r1': 98, 'r2': 76}
+Unreadable Images in Hosp Test    : 0
+Hospital Training (Unused)        : Normal=195, Glaucoma=116

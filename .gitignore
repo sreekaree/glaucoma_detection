@@ -1,0 +1,26 @@
+# Data directories (raw and large processed images)
+data/raw/
+data/processed/
+
+# Local configuration containing personal absolute paths
+config/paths.yaml
+
+# Python cache & environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# OS & IDE generated files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Keep gitignore clean for manifests and reports
+!metadata/master_manifest.csv
+!splits/drishti_5fold_splits.csv
+!config/paths.example.yaml

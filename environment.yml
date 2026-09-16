@@ -1,0 +1,20 @@
+name: glaucoma-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy>=1.24.0
+  - pandas>=2.0.0
+  - opencv>=4.7.0
+  - pillow>=9.5.0
+  - scikit-learn>=1.2.0
+  - scikit-image>=0.20.0
+  - matplotlib>=3.7.0
+  - seaborn>=0.13.0
+  - pyyaml>=6.0
+  - openpyxl>=3.1.0
+  - xlrd>=2.0.1
+  - pip
+  - pip:
+    - -r requirements.txt

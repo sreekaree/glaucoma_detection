@@ -1,0 +1,50 @@
+{
+  "subset_summary": {
+    "hospital_test": {
+      "total": 174,
+      "normal": 118,
+      "glaucoma": 56,
+      "prefixes": {
+        "r1": 98,
+        "r2": 76
+      }
+    },
+    "hospital_train": {
+      "total": 311,
+      "normal": 195,
+      "glaucoma": 116,
+      "prefixes": {
+        "r2": 174,
+        "r3": 137
+      }
+    },
+    "random_test": {
+      "total": 146,
+      "normal": 94,
+      "glaucoma": 52,
+      "prefixes": {
+        "r2": 84,
+        "r3": 45,
+        "r1": 17
+      }
+    },
+    "random_train": {
+      "total": 339,
+      "normal": 219,
+      "glaucoma": 120,
+      "prefixes": {
+        "r2": 166,
+        "r3": 92,
+        "r1": 81
+      }
+    }
+  },
+  "total_records_collected": 970,
+  "hospital_total_files": 485,
+  "hospital_unique_md5s": 485,
+  "random_total_files": 485,
+  "random_unique_md5s": 485,
+  "total_unique_physical_images": 485,
+  "hospital_random_md5_overlap": 485,
+  "hospital_train_test_md5_overlap": 0
+}
