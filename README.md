@@ -95,7 +95,9 @@ glaucoma_detection/
 │   ├── quality_control.py             # Executes 8-point automated QC suite
 │   ├── visual_checks.py               # Generates side-by-side BEFORE/AFTER visual grids
 │   ├── eda.py                         # Computes EDA statistics and outputs plots
-│   └── extract_texture_features.py    # Extracts GLCM (12) + GLRLM (11) texture features
+│   ├── extract_texture_features.py    # Extracts GLCM (12) + GLRLM (11) texture features
+│   ├── validate_inputs.py             # Stage 1: validates all feature CSVs, counts, alignment
+│   └── train_classical_models.py      # Stage 2: leakage-safe SVM/RF/XGBoost 5-fold CV
 │
 ├── metadata/
 │   └── master_manifest.csv            # Authoritative project manifest (631 entries)
@@ -113,7 +115,12 @@ glaucoma_detection/
     ├── quality_control/               # QC test result logs (100% Passed)
     ├── visual_checks/                 # BEFORE/AFTER grid images
     ├── eda/                           # EDA text summaries and distribution charts
-    └── texture_features/              # Feature stats, config JSON & extraction report
+    ├── texture_features/              # Feature stats, config JSON & extraction report
+    └── classical_ml/                  # Classical ML outputs (created at training time)
+        ├── fold_metrics/              #   per-fold metric CSV per (model, feature_set)
+        ├── predictions/               #   OOF + external test predictions
+        ├── confusion_matrices/        #   PNG confusion matrices
+        └── summaries/                 #   aggregated mean±std CSV, JSON, final report
 ```
 
 ---
@@ -124,7 +131,7 @@ glaucoma_detection/
 # 1. Install Dependencies
 pip install -r requirements.txt
 
-# 2. Run Data Preparation & Feature Extraction
+# 2. Run Data Preparation & Feature Extraction (Stages 1-6, already complete)
 python src/audit_datasets.py
 python src/split_drishti.py
 python src/analyze_rimone_overlap.py
@@ -134,4 +141,29 @@ python src/quality_control.py
 python src/visual_checks.py
 python src/eda.py
 python src/extract_texture_features.py
+
+# 3. Validate all inputs before training (Stage 7, Setup)
+python src/validate_inputs.py
+
+# 4. Classical ML training (Stage 7 — awaiting authorisation)
+# Dry-run (config check, no training):
+python src/train_classical_models.py --dry-run
+# Full training:
+python src/train_classical_models.py
 ```
+
+---
+
+## 6. Classical ML Experiment Summary
+
+> **Status**: Script validated. Training not yet executed.
+
+| | GLCM (12 feat) | GLRLM (11 feat) | GLCM+GLRLM (23 feat) |
+|:---|:---:|:---:|:---:|
+| **SVM** (RBF, balanced) | planned | planned | planned |
+| **Random Forest** (balanced) | planned | planned | planned |
+| **XGBoost** | planned | planned | planned |
+
+**Evaluation**: 5-fold CV on DRISHTI (development) + direct generalisation to HRF and RIM-ONE (external, never used in training).
+
+**Metrics reported**: AUC-ROC, F1, Sensitivity, Specificity, Balanced Accuracy, Precision, Recall.

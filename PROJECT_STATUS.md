@@ -16,7 +16,7 @@ This document records the exact current state, completed milestones, verified me
 | **Visual Verification Grids**| **COMPLETE** | Generated side-by-side BEFORE/AFTER visual comparison grids. |
 | **Exploratory Data Analysis** | **COMPLETE** | Summary tables, majority baselines, and distribution charts. |
 | **Texture Feature Extraction** | **COMPLETE** | Extracted 12 GLCM + 11 GLRLM features (616 rows, 0 NaN/Inf). |
-| **Classical Classifiers** | **NOT STARTED**| SVM / Random Forest / XGBoost training pending. |
+| **Classical Classifiers** | **READY** | Script written, validated, dry-run passed. Awaiting training authorisation. |
 | **Deep Learning Models** | **NOT STARTED**| MobileNetV2 / ResNet50 fine-tuning pending. |
 | **Explainability (Grad-CAM)** | **NOT STARTED**| Grad-CAM / Grad-CAM++ visualizations pending. |
 
@@ -87,12 +87,61 @@ Handcrafted texture features were extracted from the preprocessed 224x224 RGB im
 
 ---
 
-## 5. Next Steps for Upcoming ML Experiments
+## 5. Stage 7 — Classical ML Experiment Plan (READY, NOT YET EXECUTED)
 
-1. Train classical ML classifiers (SVM, Random Forest, XGBoost) on DRISHTI 5-fold CV using:
-   - Feature Set A: GLCM only
-   - Feature Set B: GLRLM only
-   - Feature Set C: GLCM + GLRLM combined
-2. Evaluate classical models on external test sets (HRF and RIM-ONE DL).
-3. Fine-tune deep learning backbones (MobileNetV2, ResNet50) on DRISHTI.
-4. Generate Grad-CAM heatmaps for explainability analysis.
+### Experiment Matrix
+
+| Classifier | Feature Set A (GLCM, 12) | Feature Set B (GLRLM, 11) | Feature Set C (GLCM+GLRLM, 23) |
+| :--- | :---: | :---: | :---: |
+| **SVM** (RBF, class-balanced) | planned | planned | planned |
+| **Random Forest** (class-balanced) | planned | planned | planned |
+| **XGBoost** | planned | planned | planned |
+
+**Total experiments**: 9 (3 classifiers × 3 feature sets × 5 DRISHTI folds)
+
+### Leakage-Safe Protocol
+
+- `StandardScaler` fitted ONLY on the 4 training DRISHTI folds per CV iteration.
+- `GridSearchCV` (inner 3-fold stratified CV, scoring = `roc_auc`) used for hyperparameter selection within training folds only.
+- HRF and RIM-ONE are NEVER touched during fitting, scaling, or tuning.
+- `sklearn Pipeline` enforces fit-on-train-only.
+
+### Hyperparameter Grids (Fixed, Reproducible)
+
+| Classifier | Parameter | Values |
+| :--- | :--- | :--- |
+| SVM | C | [0.1, 1.0, 10.0] |
+| SVM | gamma | ['scale', 'auto'] |
+| Random Forest | n_estimators | [100, 200] |
+| Random Forest | max_depth | [None, 10, 20] |
+| Random Forest | min_samples_leaf | [1, 3] |
+| XGBoost | n_estimators | [100, 200] |
+| XGBoost | max_depth | [3, 5] |
+| XGBoost | learning_rate | [0.05, 0.1] |
+| XGBoost | subsample | [0.8, 1.0] |
+
+### Output Structure
+
+```
+results/classical_ml/
+  fold_metrics/       per-fold metric CSV for each (model, feature_set)
+  predictions/        OOF predictions + external test predictions per fold
+  confusion_matrices/ PNG confusion matrices for validation & external
+  summaries/          aggregated mean+/-std CSV, JSON, final report
+```
+
+### Script
+
+`src/train_classical_models.py` — written and dry-run validated. Run with:
+```bash
+python src/train_classical_models.py            # full training
+python src/train_classical_models.py --dry-run  # config check only
+```
+
+---
+
+## 6. Future Steps
+
+1. (**PENDING USER AUTHORISATION**) Execute `src/train_classical_models.py`.
+2. Fine-tune deep learning backbones (MobileNetV2, ResNet50) on DRISHTI.
+3. Generate Grad-CAM heatmaps for explainability analysis.
