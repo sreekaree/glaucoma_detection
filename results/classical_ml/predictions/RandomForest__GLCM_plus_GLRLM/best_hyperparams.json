@@ -1,0 +1,27 @@
+{
+  "fold_0": {
+    "clf__max_depth": null,
+    "clf__min_samples_leaf": 1,
+    "clf__n_estimators": 100
+  },
+  "fold_1": {
+    "clf__max_depth": null,
+    "clf__min_samples_leaf": 3,
+    "clf__n_estimators": 100
+  },
+  "fold_2": {
+    "clf__max_depth": null,
+    "clf__min_samples_leaf": 3,
+    "clf__n_estimators": 200
+  },
+  "fold_3": {
+    "clf__max_depth": null,
+    "clf__min_samples_leaf": 3,
+    "clf__n_estimators": 200
+  },
+  "fold_4": {
+    "clf__max_depth": null,
+    "clf__min_samples_leaf": 3,
+    "clf__n_estimators": 100
+  }
+}

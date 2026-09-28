@@ -1,0 +1,74 @@
+========================================================================
+GLAUCOMA DETECTION — CLASSICAL ML EXPERIMENT REPORT
+Started : 2026-09-16 21:36:33
+Finished: 2026-09-16 21:39:34
+========================================================================
+
+INNER CV  : StratifiedGroupKFold(n_splits=3, shuffle=True, seed=42)
+           groups = patient_id  [PATIENT-LEVEL, LEAKAGE-FREE]
+OUTER CV  : Pre-assigned 5-fold column (StratifiedGroupKFold, seed=42)
+THRESHOLD : 0.5 (fixed, never tuned on external data)
+SCORING   : roc_auc
+
+Feature sets : GLCM (12), GLRLM (11), GLCM+GLRLM (23)
+Classifiers  : SVM (RBF, balanced), RandomForest (balanced), XGBoost
+Dev set      : DRISHTI 101 images, 68 patients, 5-fold CV
+External     : HRF (30), RIM-ONE (485 = r1:98 + r2:250 + r3:137)
+
+────────────────────────────────────────────────────────────────────────
+COMPARISON TABLE
+────────────────────────────────────────────────────────────────────────
+               Experiment   DRISHTI AUC  DRISHTI Sens  DRISHTI Spec    DRISHTI F1 HRF AUC HRF Sens HRF Spec HRF F1 RIMONE AUC RIMONE Sens RIMONE Spec RIMONE F1 RIMONE r1 AUC RIMONE r2 AUC RIMONE r3 AUC
+               GLCM + SVM 0.4602±0.1095 0.9571±0.0958 0.0952±0.1468 0.8111±0.0609  0.6311   1.0000   0.0000 0.6667     0.5369      1.0000      0.0000    0.5236        0.7006        0.5672        0.5579
+      GLCM + RandomForest 0.5731±0.0980 0.7143±0.1675 0.3571±0.1438 0.7082±0.1137  0.7067   1.0000   0.0667 0.6818     0.6411      0.6686      0.5112    0.5227        0.3953        0.7211        0.6231
+           GLCM + XGBoost 0.5265±0.1067 0.7857±0.0875 0.2571±0.1452 0.7418±0.0393  0.7200   1.0000   0.0667 0.6818     0.5832      0.9884      0.0032    0.5199        0.3702        0.6566        0.5646
+              GLRLM + SVM 0.4786±0.1466 0.9857±0.0319 0.0000±0.0000 0.8118±0.0263  0.7022   1.0000   0.0000 0.6667     0.5227      1.0000      0.0000    0.5236        0.5921        0.5922        0.5914
+     GLRLM + RandomForest 0.5505±0.0643 0.7143±0.0875 0.4143±0.1637 0.7230±0.0481  0.6800   0.9333   0.3333 0.7179     0.4728      0.5233      0.4345    0.4100        0.5233        0.4762        0.5545
+          GLRLM + XGBoost 0.4990±0.1099 0.8000±0.1174 0.1333±0.1394 0.7301±0.0781  0.7289   1.0000   0.2000 0.7143     0.4725      0.9651      0.0256    0.5163        0.5194        0.5042        0.5163
+         GLCM+GLRLM + SVM 0.4816±0.1132 0.9714±0.0639 0.0000±0.0000 0.8043±0.0430  0.6978   1.0000   0.0000 0.6667     0.5069      1.0000      0.0000    0.5236        0.6870        0.5069        0.5941
+GLCM+GLRLM + RandomForest 0.5541±0.0797 0.6857±0.1083 0.3238±0.1198 0.6874±0.0605  0.6667   1.0000   0.0667 0.6818     0.6255      0.6977      0.4984    0.5345        0.4109        0.7205        0.5975
+     GLCM+GLRLM + XGBoost 0.5367±0.0980 0.8143±0.1083 0.2571±0.1452 0.7577±0.0544  0.5289   1.0000   0.0000 0.6667     0.5787      0.8256      0.3355    0.5441        0.4370        0.7130        0.5200
+
+────────────────────────────────────────────────────────────────────────
+DETAILED DRISHTI 5-FOLD RESULTS (mean +/- std)
+────────────────────────────────────────────────────────────────────────
+  SVM            | GLCM         | AUC=0.4602+/-0.1095 | Sens=0.9571 | Spec=0.0952 | F1=0.8111 | Acc=0.6943
+  RandomForest   | GLCM         | AUC=0.5731+/-0.0980 | Sens=0.7143 | Spec=0.3571 | F1=0.7082 | Acc=0.6052
+  XGBoost        | GLCM         | AUC=0.5265+/-0.1067 | Sens=0.7857 | Spec=0.2571 | F1=0.7418 | Acc=0.6243
+  SVM            | GLRLM        | AUC=0.4786+/-0.1466 | Sens=0.9857 | Spec=0.0000 | F1=0.8118 | Acc=0.6838
+  RandomForest   | GLRLM        | AUC=0.5505+/-0.0643 | Sens=0.7143 | Spec=0.4143 | F1=0.7230 | Acc=0.6238
+  XGBoost        | GLRLM        | AUC=0.4990+/-0.1099 | Sens=0.8000 | Spec=0.1333 | F1=0.7301 | Acc=0.5957
+  SVM            | GLCM+GLRLM   | AUC=0.4816+/-0.1132 | Sens=0.9714 | Spec=0.0000 | F1=0.8043 | Acc=0.6743
+  RandomForest   | GLCM+GLRLM   | AUC=0.5541+/-0.0797 | Sens=0.6857 | Spec=0.3238 | F1=0.6874 | Acc=0.5743
+  XGBoost        | GLCM+GLRLM   | AUC=0.5367+/-0.0980 | Sens=0.8143 | Spec=0.2571 | F1=0.7577 | Acc=0.6438
+
+────────────────────────────────────────────────────────────────────────
+RIM-ONE PER-SITE (pooled)
+────────────────────────────────────────────────────────────────────────
+  RIM-ONE r1 | SVM            | GLCM         | AUC=0.7006
+  RIM-ONE r1 | RandomForest   | GLCM         | AUC=0.3953
+  RIM-ONE r1 | XGBoost        | GLCM         | AUC=0.3702
+  RIM-ONE r1 | SVM            | GLRLM        | AUC=0.5921
+  RIM-ONE r1 | RandomForest   | GLRLM        | AUC=0.5233
+  RIM-ONE r1 | XGBoost        | GLRLM        | AUC=0.5194
+  RIM-ONE r1 | SVM            | GLCM+GLRLM   | AUC=0.6870
+  RIM-ONE r1 | RandomForest   | GLCM+GLRLM   | AUC=0.4109
+  RIM-ONE r1 | XGBoost        | GLCM+GLRLM   | AUC=0.4370
+  RIM-ONE r2 | SVM            | GLCM         | AUC=0.5672
+  RIM-ONE r2 | RandomForest   | GLCM         | AUC=0.7211
+  RIM-ONE r2 | XGBoost        | GLCM         | AUC=0.6566
+  RIM-ONE r2 | SVM            | GLRLM        | AUC=0.5922
+  RIM-ONE r2 | RandomForest   | GLRLM        | AUC=0.4762
+  RIM-ONE r2 | XGBoost        | GLRLM        | AUC=0.5042
+  RIM-ONE r2 | SVM            | GLCM+GLRLM   | AUC=0.5069
+  RIM-ONE r2 | RandomForest   | GLCM+GLRLM   | AUC=0.7205
+  RIM-ONE r2 | XGBoost        | GLCM+GLRLM   | AUC=0.7130
+  RIM-ONE r3 | SVM            | GLCM         | AUC=0.5579
+  RIM-ONE r3 | RandomForest   | GLCM         | AUC=0.6231
+  RIM-ONE r3 | XGBoost        | GLCM         | AUC=0.5646
+  RIM-ONE r3 | SVM            | GLRLM        | AUC=0.5914
+  RIM-ONE r3 | RandomForest   | GLRLM        | AUC=0.5545
+  RIM-ONE r3 | XGBoost        | GLRLM        | AUC=0.5163
+  RIM-ONE r3 | SVM            | GLCM+GLRLM   | AUC=0.5941
+  RIM-ONE r3 | RandomForest   | GLCM+GLRLM   | AUC=0.5975
+  RIM-ONE r3 | XGBoost        | GLCM+GLRLM   | AUC=0.5200

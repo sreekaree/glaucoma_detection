@@ -1,0 +1,22 @@
+{
+  "fold_0": {
+    "clf__C": 0.1,
+    "clf__gamma": "scale"
+  },
+  "fold_1": {
+    "clf__C": 1.0,
+    "clf__gamma": "scale"
+  },
+  "fold_2": {
+    "clf__C": 10.0,
+    "clf__gamma": "scale"
+  },
+  "fold_3": {
+    "clf__C": 10.0,
+    "clf__gamma": "scale"
+  },
+  "fold_4": {
+    "clf__C": 0.1,
+    "clf__gamma": "scale"
+  }
+}

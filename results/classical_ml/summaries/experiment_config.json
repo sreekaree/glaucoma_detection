@@ -1,0 +1,21 @@
+{
+  "run_timestamp": "2026-09-16 21:36:33",
+  "random_seed": 42,
+  "outer_folds": 5,
+  "inner_folds": 3,
+  "inner_cv_method": "StratifiedGroupKFold(groups=patient_id)",
+  "outer_cv_method": "pre-assigned patient-level folds",
+  "scoring": "roc_auc",
+  "threshold": 0.5,
+  "classifiers": [
+    "SVM",
+    "RandomForest",
+    "XGBoost"
+  ],
+  "feature_sets": [
+    "GLCM",
+    "GLRLM",
+    "GLCM+GLRLM"
+  ],
+  "xgboost_available": true
+}

@@ -1,0 +1,32 @@
+{
+  "fold_0": {
+    "clf__learning_rate": 0.1,
+    "clf__max_depth": 3,
+    "clf__n_estimators": 200,
+    "clf__subsample": 0.8
+  },
+  "fold_1": {
+    "clf__learning_rate": 0.1,
+    "clf__max_depth": 3,
+    "clf__n_estimators": 200,
+    "clf__subsample": 0.8
+  },
+  "fold_2": {
+    "clf__learning_rate": 0.05,
+    "clf__max_depth": 5,
+    "clf__n_estimators": 200,
+    "clf__subsample": 0.8
+  },
+  "fold_3": {
+    "clf__learning_rate": 0.05,
+    "clf__max_depth": 5,
+    "clf__n_estimators": 100,
+    "clf__subsample": 1.0
+  },
+  "fold_4": {
+    "clf__learning_rate": 0.05,
+    "clf__max_depth": 5,
+    "clf__n_estimators": 100,
+    "clf__subsample": 0.8
+  }
+}

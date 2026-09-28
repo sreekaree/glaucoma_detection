@@ -16,7 +16,7 @@ This document records the exact current state, completed milestones, verified me
 | **Visual Verification Grids**| **COMPLETE** | Generated side-by-side BEFORE/AFTER visual comparison grids. |
 | **Exploratory Data Analysis** | **COMPLETE** | Summary tables, majority baselines, and distribution charts. |
 | **Texture Feature Extraction** | **COMPLETE** | Extracted 12 GLCM + 11 GLRLM features (616 rows, 0 NaN/Inf). |
-| **Classical Classifiers** | **READY** | Script written, validated, dry-run passed. Awaiting training authorisation. |
+| **Classical Classifiers** | **COMPLETE** | 9 experiments (SVM/RF/XGBoost x GLCM/GLRLM/Combined). Results in `results/classical_ml/`. |
 | **Deep Learning Models** | **NOT STARTED**| MobileNetV2 / ResNet50 fine-tuning pending. |
 | **Explainability (Grad-CAM)** | **NOT STARTED**| Grad-CAM / Grad-CAM++ visualizations pending. |
 
@@ -87,61 +87,81 @@ Handcrafted texture features were extracted from the preprocessed 224x224 RGB im
 
 ---
 
-## 5. Stage 7 — Classical ML Experiment Plan (READY, NOT YET EXECUTED)
+## 5. Stage 7 — Classical ML Experiment Results (COMPLETE)
 
-### Experiment Matrix
+### Leakage Protocol Applied
+- **Outer CV**: Pre-assigned patient-level folds (`StratifiedGroupKFold`, seed=42, 5 splits)
+- **Inner CV**: `StratifiedGroupKFold(n_splits=3, shuffle=True, random_state=42)` with `groups=patient_id`
+- **StandardScaler**: Inside `sklearn.Pipeline`, fitted only on outer training folds
+- **Threshold**: Fixed at 0.5. Not tuned on HRF or RIM-ONE.
+- **HRF/RIM-ONE**: Used for evaluation only — never fit, scaled, or tuned on.
 
-| Classifier | Feature Set A (GLCM, 12) | Feature Set B (GLRLM, 11) | Feature Set C (GLCM+GLRLM, 23) |
-| :--- | :---: | :---: | :---: |
-| **SVM** (RBF, class-balanced) | planned | planned | planned |
-| **Random Forest** (class-balanced) | planned | planned | planned |
-| **XGBoost** | planned | planned | planned |
+### DRISHTI 5-Fold CV Results (mean ± std, AUC from probabilities)
 
-**Total experiments**: 9 (3 classifiers × 3 feature sets × 5 DRISHTI folds)
+| Experiment | AUC | Sensitivity | Specificity | F1 | Accuracy |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| GLCM + SVM | 0.460±0.110 | 0.957±0.096 | 0.095±0.147 | 0.811±0.061 | 0.694 |
+| GLCM + RandomForest | **0.573±0.098** | 0.714±0.168 | 0.357±0.144 | 0.708±0.114 | 0.605 |
+| GLCM + XGBoost | 0.527±0.107 | 0.786±0.087 | 0.257±0.145 | 0.742±0.039 | 0.624 |
+| GLRLM + SVM | 0.479±0.147 | 0.986±0.032 | 0.000±0.000 | 0.812±0.026 | 0.684 |
+| GLRLM + RandomForest | 0.551±0.064 | 0.714±0.087 | 0.414±0.164 | 0.723±0.048 | 0.624 |
+| GLRLM + XGBoost | 0.499±0.110 | 0.800±0.117 | 0.133±0.139 | 0.730±0.078 | 0.596 |
+| GLCM+GLRLM + SVM | 0.482±0.113 | 0.971±0.064 | 0.000±0.000 | 0.804±0.043 | 0.674 |
+| GLCM+GLRLM + RandomForest | 0.554±0.080 | 0.686±0.108 | 0.324±0.120 | 0.687±0.060 | 0.574 |
+| GLCM+GLRLM + XGBoost | 0.537±0.098 | 0.814±0.108 | 0.257±0.145 | 0.758±0.054 | 0.644 |
 
-### Leakage-Safe Protocol
+> **Best DRISHTI AUC**: GLCM + RandomForest (0.573±0.098)
 
-- `StandardScaler` fitted ONLY on the 4 training DRISHTI folds per CV iteration.
-- `GridSearchCV` (inner 3-fold stratified CV, scoring = `roc_auc`) used for hyperparameter selection within training folds only.
-- HRF and RIM-ONE are NEVER touched during fitting, scaling, or tuning.
-- `sklearn Pipeline` enforces fit-on-train-only.
+### HRF External Test Results (pooled, 30 images)
 
-### Hyperparameter Grids (Fixed, Reproducible)
+| Experiment | AUC | Sensitivity | Specificity | F1 | Accuracy |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| GLCM + SVM | 0.631 | 1.000 | 0.000 | 0.667 | 0.500 |
+| GLCM + RandomForest | 0.707 | 1.000 | 0.067 | 0.682 | 0.533 |
+| GLCM + XGBoost | **0.720** | 1.000 | 0.067 | 0.682 | 0.533 |
+| GLRLM + SVM | 0.702 | 1.000 | 0.000 | 0.667 | 0.500 |
+| GLRLM + RandomForest | 0.680 | 0.933 | 0.333 | **0.718** | **0.633** |
+| GLRLM + XGBoost | 0.729 | 1.000 | 0.200 | 0.714 | 0.600 |
+| GLCM+GLRLM + SVM | 0.698 | 1.000 | 0.000 | 0.667 | 0.500 |
+| GLCM+GLRLM + RandomForest | 0.667 | 1.000 | 0.067 | 0.682 | 0.533 |
+| GLCM+GLRLM + XGBoost | 0.529 | 1.000 | 0.000 | 0.667 | 0.500 |
 
-| Classifier | Parameter | Values |
-| :--- | :--- | :--- |
-| SVM | C | [0.1, 1.0, 10.0] |
-| SVM | gamma | ['scale', 'auto'] |
-| Random Forest | n_estimators | [100, 200] |
-| Random Forest | max_depth | [None, 10, 20] |
-| Random Forest | min_samples_leaf | [1, 3] |
-| XGBoost | n_estimators | [100, 200] |
-| XGBoost | max_depth | [3, 5] |
-| XGBoost | learning_rate | [0.05, 0.1] |
-| XGBoost | subsample | [0.8, 1.0] |
+> **Best HRF AUC**: GLRLM + XGBoost (0.729)
 
-### Output Structure
+### RIM-ONE External Test Results (pooled, 485 images)
 
-```
-results/classical_ml/
-  fold_metrics/       per-fold metric CSV for each (model, feature_set)
-  predictions/        OOF predictions + external test predictions per fold
-  confusion_matrices/ PNG confusion matrices for validation & external
-  summaries/          aggregated mean+/-std CSV, JSON, final report
-```
+| Experiment | AUC | Sensitivity | Specificity | F1 | Accuracy |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| GLCM + SVM | 0.537 | 1.000 | 0.000 | 0.524 | 0.355 |
+| GLCM + RandomForest | **0.641** | 0.669 | 0.511 | 0.523 | 0.567 |
+| GLCM + XGBoost | 0.583 | 0.988 | 0.003 | 0.520 | 0.353 |
+| GLRLM + SVM | 0.523 | 1.000 | 0.000 | 0.524 | 0.355 |
+| GLRLM + RandomForest | 0.473 | 0.523 | 0.435 | 0.410 | 0.466 |
+| GLRLM + XGBoost | 0.473 | 0.965 | 0.026 | 0.516 | 0.359 |
+| GLCM+GLRLM + SVM | 0.507 | 1.000 | 0.000 | 0.524 | 0.355 |
+| GLCM+GLRLM + RandomForest | 0.626 | 0.698 | 0.498 | **0.535** | **0.569** |
+| GLCM+GLRLM + XGBoost | 0.579 | 0.826 | 0.336 | 0.544 | 0.509 |
 
-### Script
+> **Best RIM-ONE AUC**: GLCM + RandomForest (0.641)
 
-`src/train_classical_models.py` — written and dry-run validated. Run with:
-```bash
-python src/train_classical_models.py            # full training
-python src/train_classical_models.py --dry-run  # config check only
-```
+### RIM-ONE Per-Site AUC Summary (pooled)
 
----
+| Experiment | r1 AUC | r2 AUC | r3 AUC |
+|:---|:---:|:---:|:---:|
+| GLCM + SVM | **0.701** | 0.567 | 0.558 |
+| GLCM + RandomForest | 0.395 | **0.721** | **0.623** |
+| GLCM + XGBoost | 0.370 | 0.657 | 0.565 |
+| GLRLM + SVM | 0.592 | 0.592 | 0.591 |
+| GLRLM + RandomForest | 0.523 | 0.476 | 0.555 |
+| GLRLM + XGBoost | 0.519 | 0.504 | 0.516 |
+| GLCM+GLRLM + SVM | 0.687 | 0.507 | 0.594 |
+| GLCM+GLRLM + RandomForest | 0.411 | 0.721 | 0.598 |
+| GLCM+GLRLM + XGBoost | 0.437 | 0.713 | 0.520 |
 
-## 6. Future Steps
+### Key Observations
 
-1. (**PENDING USER AUTHORISATION**) Execute `src/train_classical_models.py`.
-2. Fine-tune deep learning backbones (MobileNetV2, ResNet50) on DRISHTI.
-3. Generate Grad-CAM heatmaps for explainability analysis.
+- **SVM consistently predicts all-Glaucoma** (Specificity ≈ 0) across all feature sets — the class-balance correction drives it to the majority class on this small DRISHTI dataset.
+- **RandomForest** is the most balanced classifier overall (best DRISHTI AUC, best RIM-ONE AUC).
+- **GLRLM features alone underperform** GLCM on RIM-ONE (RF: 0.473 vs 0.641), suggesting GLCM captures more transferable texture.
+- **Cross-site generalisation is difficult**: r1 (12 glaucoma / 86 normal — highly imbalanced) is hardest; r2 and r3 show higher AUC.
+- **All AUCs are modest** (0.47–0.73), confirming that handcrafted GLCM+GLRLM features alone are insufficient — deep learning fine-tuning is the next planned step.
